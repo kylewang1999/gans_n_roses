@@ -1,0 +1,6 @@
+*.tgz
+data
+.DS_Store
+.ipynb_checkpoints
+__pycache__
+experiment data
