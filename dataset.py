@@ -11,32 +11,25 @@ import torch.nn.functional as F
 
 class Flowers102(Dataset):
 
-    def __init__(self, datasetFile, transform=None, split='train'):
+    def __init__(self, datasetFile='./data/flowers.hdf5', transform=None, split='train'):
         assert split in ['train', 'valid', 'test'], f'split should be \'train\'/\'val\'/\'test\'. Got {split} instead'
         self.datasetFile = datasetFile
-        self.transform = transform
-        self.dataset = None
-        self.dataset_keys = None
         self.split = split
+        self.transform = transform
+        self.dataset = h5py.File(self.datasetFile, mode='r')
+        self.dataset_keys = [str(k) for k in self.dataset[self.split].keys()][:64]    # FIXME: Change back later
         self.h5py2int = lambda x: int(np.array(x))
+        self.transform = transform
 
-    def __len__(self):
-        f = h5py.File(self.datasetFile, 'r')
-        self.dataset_keys = [str(k) for k in f[self.split].keys()]
-        length = len(f[self.split])
-        f.close()
-
-        return length
+    def __len__(self): return len(self.dataset_keys)
 
     def __getitem__(self, idx):
-        if self.dataset is None:
-            self.dataset = h5py.File(self.datasetFile, mode='r')
-            self.dataset_keys = [str(k) for k in self.dataset[self.split].keys()]
-
         example_name = self.dataset_keys[idx]
         example = self.dataset[self.split][example_name]
 
-        # pdb.set_trace()
+
+        txt = np.array(example['txt']).astype(str)
+
 
         right_image = bytes(np.array(example['img']))
         right_embed = np.array(example['embeddings'], dtype=float)
@@ -49,8 +42,6 @@ class Flowers102(Dataset):
         right_image = self.validate_image(right_image)
         wrong_image = self.validate_image(wrong_image)
 
-        txt = np.array(example['txt']).astype(str)
-
         sample = {
             'right_images': torch.FloatTensor(right_image),
             'right_embed': torch.FloatTensor(right_embed),
@@ -58,7 +49,6 @@ class Flowers102(Dataset):
             'inter_embed': torch.FloatTensor(inter_embed),
             'txt': str(txt)
         }
-
         sample['right_images'] = sample['right_images'].sub_(127.5).div_(127.5)
         sample['wrong_images'] =sample['wrong_images'].sub_(127.5).div_(127.5)
 
