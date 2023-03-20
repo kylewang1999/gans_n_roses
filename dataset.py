@@ -4,7 +4,6 @@ import pdb
 from PIL import Image
 
 import torch
-from torch.autograd import Variable
 import pdb
 import torch.nn.functional as F
 
@@ -17,7 +16,7 @@ class Flowers102(Dataset):
         self.split = split
         self.transform = transform
         self.dataset = h5py.File(self.datasetFile, mode='r')
-        self.dataset_keys = [str(k) for k in self.dataset[self.split].keys()][:64]    # FIXME: Change back later
+        self.dataset_keys = [str(k) for k in self.dataset[self.split].keys()]    # FIXME: Change back later
         self.h5py2int = lambda x: int(np.array(x))
         self.transform = transform
 

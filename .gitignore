@@ -4,5 +4,6 @@ data
 .ipynb_checkpoints
 __pycache__
 experiment data
+experiment_data
 foo.*
 .vscode
